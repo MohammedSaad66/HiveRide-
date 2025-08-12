@@ -1,10 +1,12 @@
-// Firebase configuration
+// ✅ Firebase Config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC955U9CGs0-aAcS0hgSFQgvDlwOK1SRnA",
+  authDomain: "flutter-bus-hiveride.firebaseapp.com",
+  databaseURL: "https://flutter-bus-hiveride-default-rtdb.firebaseio.com",
+  projectId: "flutter-bus-hiveride",
+  storageBucket: "flutter-bus-hiveride.firebasestorage.app",
+  messagingSenderId: "185743407069",
+  appId: "1:185743407069:web:7b9c33f8e25b8966d62834"
 };
 
 // Initialize Firebase
@@ -131,7 +133,66 @@ function editBusDetails() {
     alert("Bus details updated.");
   }
 }
+// 🚍 Add a new route
+function addRoute() {
+  const name = document.getElementById("route-name").value.trim();
+  const distance = parseFloat(document.getElementById("route-distance").value);
+  const fee = parseFloat(document.getElementById("route-fee").value);
+  if (!name || isNaN(distance) || isNaN(fee)) {
+    return alert("Enter valid route data.");
+  }
+  db.ref("routes/" + name).set({ distance, fee }).then(() => {
+    alert("Route added.");
+    loadRoutes(); // reload after add
+  });
+}
 
+// 📋 Load routes into dropdown and list
+function loadRoutes() {
+  const routeSelect = document.getElementById("student-route-edit");
+  const routeList = document.getElementById("route-list");
+
+  if (routeSelect) routeSelect.innerHTML = '<option value="">Select Route</option>';
+  if (routeList) routeList.innerHTML = "";
+
+  db.ref("routes").once("value", snap => {
+    snap.forEach(child => {
+      const name = child.key;
+      const { distance, fee } = child.val();
+
+      if (routeSelect) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = `${name} (₹${fee}, ${distance}km)`;
+        routeSelect.appendChild(option);
+      }
+
+      if (routeList) {
+        const li = document.createElement("li");
+        li.textContent = `${name}: ₹${fee}, ${distance}km`;
+        routeList.appendChild(li);
+      }
+    });
+  });
+}
+
+// ✏️ Admin sets student name, fee, and route
+function editStudentDetails() {
+  const email = document.getElementById("student-email-edit").value.trim();
+  const name = document.getElementById("student-name-edit").value.trim();
+  const route = document.getElementById("student-route-edit").value;
+  const fee = parseFloat(document.getElementById("student-fee-edit").value);
+
+  if (!email || !name || !route || isNaN(fee)) {
+    return alert("Please fill all student details.");
+  }
+
+  db.ref("studentInfo/" + email.replace(/\./g, "_")).set({
+    name, route, fee
+  }).then(() => {
+    alert("Student details updated.");
+  });
+}
 // Auth state check
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -226,22 +287,6 @@ window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-contai
 
 let confirmationResult;
 
-function sendOTP() {
-  const phone = document.getElementById("phone-number").value;
-  firebase.auth().signInWithPhoneNumber(phone, window.recaptchaVerifier)
-    .then(result => {
-      confirmationResult = result;
-      alert("OTP sent.");
-    })
-    .catch(error => alert(error.message));
-}
-
-function verifyOTP() {
-  const code = document.getElementById("otp-code").value;
-  confirmationResult.confirm(code).then(result => {
-    alert("Phone login successful!");
-  }).catch(error => alert("OTP Error: " + error.message));
-}
 
 // Google Sign-In
 function googleSignIn() {
@@ -250,4 +295,4 @@ function googleSignIn() {
     const user = result.user;
     db.ref("users/" + user.uid).set({ email: user.email, role: "student" });
   }).catch(error => alert("Google Sign-in error: " + error.message));
-                                  }
+    }
