@@ -1,119 +1,192 @@
-/* General Styling */
+/* --- ADVANCED BUS TRACKING APP STYLES --- */
+
+/* 1. FONT IMPORT & ROOT VARIABLES */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Color Palette (Light Mode) */
+  --color-bg: #E0E7FF; /* A very light, cool lavender */
+  --color-bg-gradient-start: #D9E4FF;
+  --color-bg-gradient-end: #C4D3F9;
+  --color-surface: rgba(255, 255, 255, 0.45); /* Key for glass effect */
+  --color-surface-border: rgba(255, 255, 255, 0.7);
+  --color-text-primary: #1E293B; /* Dark Slate Blue */
+  --color-text-secondary: #475569;
+  --color-accent: #3B82F6; /* Default Blue Accent */
+  --color-accent-hover: #60A5FA;
+  --color-shadow: rgba(60, 90, 150, 0.15);
+
+  /* Role-specific Accents */
+  --color-admin-accent: #EF4444; /* Red 500 */
+  --color-student-accent: #22C55E; /* Green 500 */
+  --color-driver-accent: #0EA5E9; /* Sky 500 */
+
+  /* Sizing & Effects */
+  --border-radius: 16px;
+  --shadow-sm: 0 4px 6px -1px var(--color-shadow), 0 2px 4px -2px var(--color-shadow);
+  --shadow-md: 0 10px 15px -3px var(--color-shadow), 0 4px 6px -4px var(--color-shadow);
+  --transition-speed: 0.3s;
+  --backdrop-blur: 12px;
+}
+
+.dark-mode {
+  /* Color Palette (Dark Mode) */
+  --color-bg: #0F172A; /* Dark Slate */
+  --color-bg-gradient-start: #1E293B;
+  --color-bg-gradient-end: #0B1120;
+  --color-surface: rgba(30, 41, 59, 0.6); /* Key for glass effect */
+  --color-surface-border: rgba(51, 65, 85, 0.5);
+  --color-text-primary: #F1F5F9; /* Off-white */
+  --color-text-secondary: #94A3B8;
+  --color-shadow: rgba(0, 0, 0, 0.2);
+}
+
+/* 2. GENERAL STYLING */
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f1f1f1;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background-color: var(--color-bg);
+  background-image: radial-gradient(circle at 10% 10%, var(--color-bg-gradient-start), transparent),
+                    radial-gradient(circle at 80% 90%, var(--color-bg-gradient-end), transparent);
   margin: 0;
   padding: 0;
-  transition: background 0.3s, color 0.3s;
+  color: var(--color-text-primary);
+  transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+  overflow-x: hidden; /* Prevent horizontal scroll from bus animation */
 }
 
 h1 {
+  font-weight: 600;
+  font-size: 2.25rem;
   text-align: center;
   padding: 20px;
-  color: #2c3e50;
+  color: var(--color-accent);
+  transition: color var(--transition-speed) ease;
 }
 
+/* 3. NAVBAR */
 #navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 600px;
-  margin: auto;
-  padding: 10px;
-  background-color: #ddd;
-  border-bottom: 1px solid #aaa;
-  border-radius: 0 0 10px 10px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  box-shadow: var(--shadow-md);
+  transition: background-color var(--transition-speed) ease;
 }
 
-input, select, textarea, button {
+#currentRole {
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  transition: color var(--transition-speed) ease;
+}
+
+/* 4. MAIN PANELS (Glassmorphism) */
+#login-section, #adminPanel, #studentPanel, #driverPanel {
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 30px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  transition: all var(--transition-speed) ease;
+}
+
+/* 5. FORM ELEMENTS */
+input, select, textarea {
   display: block;
   width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  margin: 12px 0;
+  padding: 12px 15px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-color: rgba(120, 120, 120, 0.1);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
 
 button {
-  background-color: #2980b9;
-  color: white;
+  display: block;
+  width: 100%;
+  margin: 20px 0 10px;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-radius: 8px;
   border: none;
+  background-color: var(--color-accent);
+  color: white;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background-color var(--transition-speed) ease, transform 0.15s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 button:hover {
-  background-color: #3498db;
+  background-color: var(--color-accent-hover);
 }
 
+button:active {
+  transform: scale(0.98);
+}
+
+/* 6. ROLE COLOR THEMES (Cleaned up with CSS Variables) */
+.admin-theme { --color-accent: var(--color-admin-accent); }
+.student-theme { --color-accent: var(--color-student-accent); }
+.driver-theme { --color-accent: var(--color-driver-accent); }
+
+/* The h1 and navbar colors now update automatically via the --color-accent variable */
+
+
+/* 7. ENHANCED BUS ANIMATION */
+@keyframes moveBus {
+  0% { transform: translateX(-200px); }
+  100% { transform: translateX(calc(100vw + 150px)); }
+}
+
+@keyframes busBob {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
+}
+
+.bus-animation {
+  position: absolute;
+  top: 150px; /* Position it lower to not interfere with navbar */
+  z-index: -1; /* Place it behind content */
+  height: 60px;
+  width: 150px;
+  animation: moveBus 10s ease-in-out infinite,
+             busBob 1.2s ease-in-out infinite;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/69/69947.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+}
+
+/* 8. UTILITY & DARK MODE SWITCH */
 .hidden {
   display: none;
 }
 
-/* Panel Styling */
-#login-section, #adminPanel, #studentPanel, #driverPanel {
-  max-width: 500px;
-  margin: 20px auto;
-  padding: 20px;
-  background: #ffffff;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  border-radius: 10px;
-  transition: all 0.5s ease;
-}
-
-/* Role Color Themes */
-.admin-theme #navbar { background: #e74c3c; }
-.student-theme #navbar { background: #27ae60; }
-.driver-theme #navbar { background: #2980b9; }
-
-.admin-theme h1, .admin-theme #currentRole { color: #e74c3c; }
-.student-theme h1, .student-theme #currentRole { color: #27ae60; }
-.driver-theme h1, .driver-theme #currentRole { color: #2980b9; }
-
-/* Bus Animation */
-@keyframes moveBus {
-  0% { left: -150px; }
-  100% { left: 100%; }
-}
-
-.bus-animation {
-  position: relative;
-  animation: moveBus 5s linear infinite;
-  height: 50px;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/69/69947.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-}
-
-/* Dark Mode */
-.dark-mode {
-  background: #121212;
-  color: #e0e0e0;
-}
-
-.dark-mode #login-section,
-.dark-mode #adminPanel,
-.dark-mode #studentPanel,
-.dark-mode #driverPanel {
-  background: #1e1e1e;
-  border: 1px solid #333;
-}
-
-.dark-mode input,
-.dark-mode select,
-.dark-mode textarea,
-.dark-mode button {
-  background: #333;
-  color: #eee;
-  border: 1px solid #555;
-}
-
-.dark-mode button:hover {
-  background-color: #444;
-}
-
-/* Toggle Switch */
+/* Dark Mode Toggle Switch */
 .switch {
   position: relative;
   display: inline-block;
@@ -121,40 +194,32 @@ button:hover {
   height: 24px;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+.switch input { opacity: 0; width: 0; height: 0; }
 
 .slider {
   position: absolute;
   cursor: pointer;
-  background-color: #ccc;
-  transition: 0.4s;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(120, 120, 120, 0.3);
+  transition: .4s;
   border-radius: 24px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 3px;
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
   background-color: white;
-  transition: 0.4s;
+  transition: .4s;
   border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: var(--color-accent);
 }
 
 input:checked + .slider:before {
   transform: translateX(26px);
-      }
+    }
