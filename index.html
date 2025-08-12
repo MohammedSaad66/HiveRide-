@@ -1,116 +1,104 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bus Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="styles.css" />
+    <title>Bus Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
 
-  <!-- Firebase & Google Maps -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+    <!-- Firebase & Google Maps -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDlBLfYKNqJyvYWcG8Cb-Azl_9ZxIJIlC0"></script>
 </head>
 <body>
-  <h1>🚌 Bus Tracker Web App</h1>
+<h1>🚌 Bus Tracker Web App</h1>
 
-  <!-- 🔐 Auth Section -->
-  <div id="auth-section">
+<!-- 🔐 Auth Section -->
+<div id="auth-section">
     <div id="register-section" class="section">
-      <h2>Register</h2>
-      <input id="reg-email" placeholder="Email" />
-      <input id="reg-password" type="password" placeholder="Password" />
-      <select id="reg-role">
-        <option value="student">Student</option>
-        <option value="admin">Admin</option>
-        <option value="driver">Driver</option>
-      </select>
-      <button onclick="register()">Register</button>
+        <h2>Register</h2>
+        <input id="reg-email" placeholder="Email" />
+        <input id="reg-password" type="password" placeholder="Password" />
+        <select id="reg-role">
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+            <option value="driver">Driver</option>
+        </select>
+        <button onclick="register()">Register</button>
     </div>
 
     <div id="login-section" class="section">
-      <h2>Login</h2>
-      <input id="login-email" placeholder="Email" />
-      <input id="login-password" type="password" placeholder="Password" />
-      <button onclick="login()">Login</button>
-    </div>
-
-    <div id="phone-login-section" class="section">
-      <h2>Login via Phone</h2>
-      <input id="phone-number" placeholder="+91XXXXXXXXXX" />
-      <div id="recaptcha-container"></div>
-      <button onclick="sendOTP()">Send OTP</button>
-      <input id="otp-code" placeholder="Enter OTP" />
-      <button onclick="verifyOTP()">Verify</button>
+        <h2>Login</h2>
+        <input id="login-email" placeholder="Email" />
+        <input id="login-password" type="password" placeholder="Password" />
+        <button onclick="login()">Login</button>
     </div>
 
     <button onclick="googleSignIn()">Sign in with Google</button>
     <button onclick="toggleAuth()">Switch Register/Login</button>
-  </div>
+</div>
 
-  <!-- 📊 Dashboard -->
-  <div id="dashboard" style="display: none;">
+<!-- 📊 Dashboard -->
+<div id="dashboard" style="display: none;">
     <h2>Welcome, <span id="user-role"></span>!</h2>
     <button onclick="logout()">Logout</button>
 
     <h3>📅 Schedule</h3>
     <ul id="schedule-list"></ul>
 
+    <!-- 🛣️ Route Fees -->
     <div id="fees-section">
-      <h3>💰 Fees</h3>
-      <p id="common-fee"></p>
-      <ul id="fees-list"></ul>
+        <h3>💰 Route Fees</h3>
+        <ul id="fees-list"></ul>
     </div>
 
     <div id="driver-info">
-      <h3>🚌 Your Bus No</h3>
-      <p id="driver-bus-no"></p>
+        <h3>🚌 Your Bus No</h3>
+        <p id="driver-bus-no"></p>
     </div>
 
+    <!-- Admin Controls -->
     <div id="admin-controls" style="display: none;">
-      <h3>➕ Add Schedule</h3>
-      <input id="new-schedule" placeholder="New schedule item" />
-      <button onclick="addSchedule()">Add</button>
+        <h3>➕ Fix Bus Schedule</h3>
+        <input id="new-schedule" placeholder="New schedule item" />
+        <button onclick="addSchedule()">Add</button>
 
-      <h3>💸 Set Common Fee</h3>
-      <input id="common-fee-input" type="number" placeholder="Enter Common Fee" />
-      <button onclick="setCommonFee()">Set Fee</button>
+        <!-- 🚍 Assign / Change Bus & Driver -->
+        <h3>🚍 Change Bus No & Route</h3>
+        <input id="bus-edit-number" placeholder="Bus No (e.g., BUS101)" />
+        <input id="bus-edit-route" placeholder="Route Name" />
+        <input id="bus-edit-driver" placeholder="Driver Name" />
+        <input id="bus-edit-phone" placeholder="Driver Phone" />
+        <button onclick="editBusDetails()">Save</button>
 
-      <h3>🎯 Set Student Fee</h3>
-      <input id="student-fee" placeholder="Email:Fee" />
-      <button onclick="setStudentFee()">Set Student Fee</button>
-
-      <h3>🚍 Assign Bus to Driver</h3>
-      <input id="driver-assign" placeholder="DriverEmail:BusNo" />
-      <button onclick="assignDriverBus()">Assign</button>
-
-      <h3>✏️ Edit Bus Details</h3>
-      <input id="bus-edit-number" placeholder="Bus No (e.g., BUS101)" />
-      <input id="bus-edit-route" placeholder="Route Name" />
-      <input id="bus-edit-driver" placeholder="Driver Name" />
-      <input id="bus-edit-phone" placeholder="Driver Phone" />
-      <button onclick="editBusDetails()">Save</button>
+        <!-- 🛣️ Manage Route Fees -->
+        <h3>🛣️ Add Route & Fee</h3>
+        <input id="route-name" placeholder="Route Name" />
+        <input id="route-distance" type="number" placeholder="Distance (km)" />
+        <input id="route-fee" type="number" placeholder="Fee (₹)" />
+        <button onclick="addRoute()">Add Route</button>
     </div>
 
     <div id="map-section" style="display: none;">
-      <h3>📍 Live Bus Locations</h3>
-      <div id="map"></div>
+        <h3>📍 Live Bus Locations</h3>
+        <div id="map"></div>
 
-      <h3>🔍 See Bus Info</h3>
-      <select id="bus-selector" onchange="showBusDetails()">
-        <option>Select a bus</option>
-      </select>
-      <div id="bus-info"></div>
+        <h3>🔍 See Bus Info</h3>
+        <select id="bus-selector" onchange="showBusDetails()">
+            <option>Select a bus</option>
+        </select>
+        <div id="bus-info"></div>
     </div>
 
     <div id="driver-location" style="display: none;">
-      <h3>📡 Send Live Location</h3>
-      <input id="busNumber" placeholder="Enter Bus Number (e.g., BUS101)" />
-      <button onclick="startSending()">Start Sending Location</button>
+        <h3>📡 Send Live Location</h3>
+        <input id="busNumber" placeholder="Enter Bus Number (e.g., BUS101)" />
+        <button onclick="startSending()">Start Sending Location</button>
     </div>
-  </div>
+</div>
 
-  <!-- Load main script -->
-  <script src="app.js"></script>
+<!-- Load main script -->
+<script src="script.js"></script>
 </body>
-        </html>
+</html>
