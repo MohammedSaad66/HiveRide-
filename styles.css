@@ -1,0 +1,160 @@
+/* General Styling */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f1f1f1;
+  margin: 0;
+  padding: 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+h1 {
+  text-align: center;
+  padding: 20px;
+  color: #2c3e50;
+}
+
+#navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 600px;
+  margin: auto;
+  padding: 10px;
+  background-color: #ddd;
+  border-bottom: 1px solid #aaa;
+  border-radius: 0 0 10px 10px;
+}
+
+input, select, textarea, button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #3498db;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Panel Styling */
+#login-section, #adminPanel, #studentPanel, #driverPanel {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  transition: all 0.5s ease;
+}
+
+/* Role Color Themes */
+.admin-theme #navbar { background: #e74c3c; }
+.student-theme #navbar { background: #27ae60; }
+.driver-theme #navbar { background: #2980b9; }
+
+.admin-theme h1, .admin-theme #currentRole { color: #e74c3c; }
+.student-theme h1, .student-theme #currentRole { color: #27ae60; }
+.driver-theme h1, .driver-theme #currentRole { color: #2980b9; }
+
+/* Bus Animation */
+@keyframes moveBus {
+  0% { left: -150px; }
+  100% { left: 100%; }
+}
+
+.bus-animation {
+  position: relative;
+  animation: moveBus 5s linear infinite;
+  height: 50px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/69/69947.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Dark Mode */
+.dark-mode {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+.dark-mode #login-section,
+.dark-mode #adminPanel,
+.dark-mode #studentPanel,
+.dark-mode #driverPanel {
+  background: #1e1e1e;
+  border: 1px solid #333;
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea,
+.dark-mode button {
+  background: #333;
+  color: #eee;
+  border: 1px solid #555;
+}
+
+.dark-mode button:hover {
+  background-color: #444;
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  transition: 0.4s;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+      }
