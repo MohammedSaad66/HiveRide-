@@ -78,7 +78,7 @@ body::before {
   z-index: -1;
   
   /* The path to your image with a dark overlay for contrast */
-  background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('IMG_20250805_104858.jpg');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('IMG_20250805_104858.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
