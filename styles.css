@@ -44,9 +44,16 @@
 /* 2. GENERAL STYLING */
 body {
   font-family: 'Poppins', 'Segoe UI', sans-serif;
-  background-color: var(--color-bg);
-  background-image: radial-gradient(circle at 10% 10%, var(--color-bg-gradient-start), transparent),
-                    radial-gradient(circle at 80% 90%, var(--color-bg-gradient-end), transparent);
+  
+  /* --- BACKGROUND IMAGE ADDED HERE --- */
+  /* This uses your uploaded image. Make sure '1000043648.jpg' is in your repository. */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('1000043648.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  /* --- End of background changes --- */
+  
   margin: 0;
   padding: 0;
   color: var(--color-text-primary);
@@ -222,4 +229,5 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(26px);
-    }
+  }
+  
