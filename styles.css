@@ -45,21 +45,38 @@
 body {
   font-family: 'Poppins', 'Segoe UI', sans-serif;
   
-  /* --- BACKGROUND IMAGE ADDED HERE --- */
-  /* This uses your uploaded image. Make sure '1000043648.jpg' is in your repository. */
-  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('IMG_20250805_104858.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  /* --- End of background changes --- */
-  
+  /* --- FIX: BACKGROUND LOGIC --- */
+  /* The body now correctly uses the color variables for light/dark modes. */
+  /* This ensures text has a proper contrasting background color behind the glass panels. */
+  background: linear-gradient(135deg, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
+  /* --- END OF FIX --- */
+
   margin: 0;
   padding: 0;
   color: var(--color-text-primary);
   transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
   overflow-x: hidden; /* Prevent horizontal scroll from bus animation */
 }
+
+/* --- FIX: ADDED PSEUDO-ELEMENT FOR BACKGROUND IMAGE --- */
+/* This new rule creates a dedicated layer for your background image. */
+body::before {
+  content: '';
+  position: fixed; /* Covers the entire screen */
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: -2; /* Places it BEHIND the bus animation and all other content */
+  
+  /* Your background image styles are moved here */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('IMG_20250805_104858.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* --- END OF FIX --- */
+
 
 h1 {
   font-weight: 600;
@@ -171,13 +188,13 @@ button:active {
 @keyframes busBob {
   0% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
-  100% { transform: translateY(0); }
+  100% { translateY(0); }
 }
 
 .bus-animation {
   position: absolute;
   top: 150px; /* Position it lower to not interfere with navbar */
-  z-index: -1; /* Place it behind content */
+  z-index: -1; /* Place it behind content but ON TOP of the new ::before background */
   height: 60px;
   width: 150px;
   animation: moveBus 10s ease-in-out infinite,
@@ -229,5 +246,4 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(26px);
-  }
-  
+}
