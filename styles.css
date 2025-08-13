@@ -47,7 +47,7 @@ body {
   
   /* --- BACKGROUND IMAGE ADDED HERE --- */
   /* This uses your uploaded image. Make sure '1000043648.jpg' is in your repository. */
-  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('1000043648.jpg');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('IMG_20250805_104858.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
