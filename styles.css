@@ -11,7 +11,7 @@
   --color-bg: #E0E7FF;
   --color-bg-gradient-start: #D9E4FF;
   --color-bg-gradient-end: #C4D3F9;
-  --color-surface: rgba(255, 255, 255, 0.45); /* Key for glass effect */
+  --color-surface: rgba(255, 255, 255, 0.75); /* Key for glass effect */
   --color-surface-border: rgba(255, 255, 255, 0.7);
   --color-text-primary: #1E293B; /* Dark Slate Blue */
   --color-text-secondary: #475569;
