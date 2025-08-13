@@ -5,21 +5,21 @@
 
 :root {
   /* Color Palette (Light Mode) */
-  --color-bg: #E0E7FF; /* A very light, cool lavender */
+  --color-bg: #E0E7FF;
   --color-bg-gradient-start: #D9E4FF;
   --color-bg-gradient-end: #C4D3F9;
   --color-surface: rgba(255, 255, 255, 0.45); /* Key for glass effect */
   --color-surface-border: rgba(255, 255, 255, 0.7);
   --color-text-primary: #1E293B; /* Dark Slate Blue */
   --color-text-secondary: #475569;
-  --color-accent: #3B82F6; /* Default Blue Accent */
+  --color-accent: #3B82F6;
   --color-accent-hover: #60A5FA;
   --color-shadow: rgba(60, 90, 150, 0.15);
 
   /* Role-specific Accents */
-  --color-admin-accent: #EF4444; /* Red 500 */
-  --color-student-accent: #22C55E; /* Green 500 */
-  --color-driver-accent: #0EA5E9; /* Sky 500 */
+  --color-admin-accent: #EF4444;
+  --color-student-accent: #22C55E;
+  --color-driver-accent: #0EA5E9;
 
   /* Sizing & Effects */
   --border-radius: 16px;
@@ -31,12 +31,12 @@
 
 .dark-mode {
   /* Color Palette (Dark Mode) */
-  --color-bg: #0F172A; /* Dark Slate */
+  --color-bg: #0F172A;
   --color-bg-gradient-start: #1E293B;
   --color-bg-gradient-end: #0B1120;
-  --color-surface: rgba(30, 41, 59, 0.6); /* Key for glass effect */
+  --color-surface: rgba(30, 41, 59, 0.6);
   --color-surface-border: rgba(51, 65, 85, 0.5);
-  --color-text-primary: #F1F5F9; /* Off-white */
+  --color-text-primary: #F1F5F9;
   --color-text-secondary: #94A3B8;
   --color-shadow: rgba(0, 0, 0, 0.2);
 }
@@ -44,21 +44,16 @@
 /* 2. GENERAL STYLING */
 body {
   font-family: 'Poppins', 'Segoe UI', sans-serif;
-  
-  /* --- FIX: BACKGROUND LOGIC --- */
   /* The body now correctly uses the color variables for light/dark modes. */
-  /* This ensures text has a proper contrasting background color behind the glass panels. */
+  /* This ensures text has a proper contrasting background behind the glass panels. */
   background: linear-gradient(135deg, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
-  /* --- END OF FIX --- */
-
   margin: 0;
   padding: 0;
   color: var(--color-text-primary);
   transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
-  overflow-x: hidden; /* Prevent horizontal scroll from bus animation */
+  overflow-x: hidden;
 }
 
-/* --- FIX: ADDED PSEUDO-ELEMENT FOR BACKGROUND IMAGE --- */
 /* This new rule creates a dedicated layer for your background image. */
 body::before {
   content: '';
@@ -67,7 +62,7 @@ body::before {
   left: 0;
   height: 100%;
   width: 100%;
-  z-index: -2; /* Places it BEHIND the bus animation and all other content */
+  z-index: -2; /* Places it BEHIND everything else */
   
   /* Your background image styles are moved here */
   background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('IMG_20250805_104858.jpg');
@@ -75,8 +70,6 @@ body::before {
   background-position: center;
   background-repeat: no-repeat;
 }
-/* --- END OF FIX --- */
-
 
 h1 {
   font-weight: 600;
@@ -143,107 +136,5 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
-}
-
-button {
-  display: block;
-  width: 100%;
-  margin: 20px 0 10px;
-  padding: 14px;
-  font-size: 1.1rem;
-  font-weight: 500;
-  border-radius: 8px;
-  border: none;
-  background-color: var(--color-accent);
-  color: white;
-  cursor: pointer;
-  transition: background-color var(--transition-speed) ease, transform 0.15s ease;
-  box-shadow: var(--shadow-sm);
-}
-
-button:hover {
-  background-color: var(--color-accent-hover);
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-/* 6. ROLE COLOR THEMES (Cleaned up with CSS Variables) */
-.admin-theme { --color-accent: var(--color-admin-accent); }
-.student-theme { --color-accent: var(--color-student-accent); }
-.driver-theme { --color-accent: var(--color-driver-accent); }
-
-/* The h1 and navbar colors now update automatically via the --color-accent variable */
-
-
-/* 7. ENHANCED BUS ANIMATION */
-@keyframes moveBus {
-  0% { transform: translateX(-200px); }
-  100% { transform: translateX(calc(100vw + 150px)); }
-}
-
-@keyframes busBob {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-  100% { translateY(0); }
-}
-
-.bus-animation {
-  position: absolute;
-  top: 150px; /* Position it lower to not interfere with navbar */
-  z-index: -1; /* Place it behind content but ON TOP of the new ::before background */
-  height: 60px;
-  width: 150px;
-  animation: moveBus 10s ease-in-out infinite,
-             busBob 1.2s ease-in-out infinite;
-  background-image: url('https://cdn-icons-png.flaticon.com/512/69/69947.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
-}
-
-/* 8. UTILITY & DARK MODE SWITCH */
-.hidden {
-  display: none;
-}
-
-/* Dark Mode Toggle Switch */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-
-.switch input { opacity: 0; width: 0; height: 0; }
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(120, 120, 120, 0.3);
-  transition: .4s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px; width: 18px;
-  left: 3px; bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-input:checked + .slider {
-  background-color: var(--color-accent);
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
+  border-
+    
