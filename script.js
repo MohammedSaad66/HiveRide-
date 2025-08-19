@@ -43,56 +43,53 @@ function login() {
 function logout() {
   auth.signOut();
 }
+  // Map initialization
+    var map = L.map('map').setView([12.9165, 79.1325], 12);
 
-// Send driver location
-let interval;
-function startSending() {
-  const busNo = document.getElementById("busNumber").value.trim();
-  if (!busNo) return alert("Enter bus number");
-  if (navigator.geolocation) {
-    interval = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(pos => {
-        db.ref("busLocations/" + busNo).set({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          timestamp: Date.now()
-        });
-      });
-    }, 5000);
-  } else {
-    alert("Geolocation not supported");
-  }
-}
+    //osm layer
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    osm.addTo(map);
+   let busMarkers = {}; // store markers for buses
 
-// Google Maps setup
-let map, markers = {};
-function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 12.9721, lng: 77.5933 },
-    zoom: 13
-  });
-}
+   // Function to update marker
+   function updateBusMarker(busId, lat, lng) {
+       if (busMarkers[busId]) {
+           busMarkers[busId].setLatLng([lat, lng]); // move marker
+       } else {
+           busMarkers[busId] = L.marker([lat, lng]).addTo(map)
+               .bindPopup(`<b>${busId}</b>`);
+       }
+   }
 
-// Track all buses on map
-function trackAllBuses() {
-  db.ref("busLocations").on("value", snap => {
-    const data = snap.val();
-    for (let busNo in data) {
-      const { latitude, longitude } = data[busNo];
-      const pos = { lat: latitude, lng: longitude };
-      if (markers[busNo]) {
-        markers[busNo].setPosition(pos);
-      } else {
-        markers[busNo] = new google.maps.Marker({
-          position: pos,
-          map,
-          label: busNo,
-          title: "Bus " + busNo
-        });
-      }
-    }
-  });
-}
+   // Listen to Firebase
+   const busesRef = firebase.database().ref("buses");
+   busesRef.on("value", snapshot => {
+       let buses = snapshot.val();
+       if (!buses) return;
+
+       // Clear all markers if needed
+       // Object.values(busMarkers).forEach(marker => map.removeLayer(marker));
+       // busMarkers = {};
+
+       // Add/update markers
+       for (let busId in buses) {
+           let { latitude, longitude } = buses[busId];
+           updateBusMarker(busId, latitude, longitude);
+       }
+   });
+
+   // When student selects a bus
+   document.getElementById("busSelect").addEventListener("change", function () {
+       let selectedBus = this.value;
+
+       if (selectedBus && busMarkers[selectedBus]) {
+           map.setView(busMarkers[selectedBus].getLatLng(), 14); // zoom to bus
+           busMarkers[selectedBus].openPopup();
+       }
+   });
+
 
 // Load bus list into dropdown
 function loadBusList() {
@@ -146,7 +143,55 @@ function addRoute() {
     loadRoutes(); // reload after add
   });
 }
+// Example schedule load
+function loadSchedule() {
+    const scheduleRef = firebase.database().ref("schedule");
+    scheduleRef.on("value", (snapshot) => {
+        const data = snapshot.val();
+        const tbody = document.getElementById("schedule-body");
+        tbody.innerHTML = "";
+        for (let key in data) {
+            const tr = document.createElement("tr");
 
+            const tdItem = document.createElement("td");
+            tdItem.innerText = data[key];
+            tr.appendChild(tdItem);
+
+            const tdActions = document.createElement("td");
+
+            // Edit button
+            const editBtn = document.createElement("button");
+            editBtn.innerText = "Edit";
+            editBtn.onclick = () => {
+                const newVal = prompt("Edit schedule:", data[key]);
+                if (newVal) {
+                    firebase.database().ref("schedule/" + key).set(newVal);
+                }
+            };
+            tdActions.appendChild(editBtn);
+
+            // Delete button
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerText = "Delete";
+            deleteBtn.onclick = () => {
+                firebase.database().ref("schedule/" + key).remove();
+            };
+            tdActions.appendChild(deleteBtn);
+
+            tr.appendChild(tdActions);
+            tbody.appendChild(tr);
+        }
+    });
+}
+
+// Add new schedule item
+function addSchedule() {
+    const val = document.getElementById("new-schedule").value;
+    if (val) {
+        firebase.database().ref("schedule").push(val);
+        document.getElementById("new-schedule").value = "";
+    }
+}
 // 📋 Load routes into dropdown and list
 function loadRoutes() {
   const routeSelect = document.getElementById("student-route-edit");
@@ -234,10 +279,7 @@ auth.onAuthStateChanged(user => {
       });
     });
 
-    // Common fee listener
-    db.ref("commonFee").on("value", snap => {
-      document.getElementById("common-fee").innerText = "Common Fee: ₹" + snap.val();
-    });
+
 
     // Student fees listener
     db.ref("studentFees").on("value", snap => {
@@ -295,4 +337,4 @@ function googleSignIn() {
     const user = result.user;
     db.ref("users/" + user.uid).set({ email: user.email, role: "student" });
   }).catch(error => alert("Google Sign-in error: " + error.message));
-    }
+   }
