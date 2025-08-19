@@ -4,12 +4,15 @@
     <title>Bus Tracker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 
     <!-- Firebase & Google Maps -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDlBLfYKNqJyvYWcG8Cb-Azl_9ZxIJIlC0"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDlBLfYKNqJyvYWcG8Cb-Azl_9ZxIJIlC0&callback=initMap"></script>
+
 </head>
 <body>
 <h1>🚌 Bus Tracker Web App</h1>
@@ -46,7 +49,15 @@
 
     <h3>📅 Schedule</h3>
     <ul id="schedule-list"></ul>
-
+    <table id="schedule-table" border="1">
+        <thead>
+        <tr>
+            <th>Schedule Item</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="schedule-body"></tbody>
+    </table>
     <!-- 🛣️ Route Fees -->
     <div id="fees-section">
         <h3>💰 Route Fees</h3>
@@ -57,7 +68,10 @@
         <h3>🚌 Your Bus No</h3>
         <p id="driver-bus-no"></p>
     </div>
-
+    <label for="bus-select">Select Bus:</label>
+    <select id="bus-select">
+        <option value="">-- Choose Bus --</option>
+    </select>
     <!-- Admin Controls -->
     <div id="admin-controls" style="display: none;">
         <h3>➕ Fix Bus Schedule</h3>
@@ -79,10 +93,26 @@
         <input id="route-fee" type="number" placeholder="Fee (₹)" />
         <button onclick="addRoute()">Add Route</button>
     </div>
-
-    <div id="map-section" style="display: none;">
-        <h3>📍 Live Bus Locations</h3>
-        <div id="map"></div>
+    <select id="busSelect">
+        <option value="">Choose Bus</option>
+        <option value="bus1">Bus1</option>
+        <option value="bus2">Bus2</option>
+        <option value="bus3">Bus3</option>
+        <option value="bus4">Bus4</option>
+        <option value="bus5">Bus5</option>
+        <option value="bus6">Bus6</option>
+        <option value="bus7">Bus7</option>
+        <option value="bus8">Bus8</option>
+        <option value="bus9">Bus9</option>
+        <option value="bus10">Bus10</option>
+        <option value="bus11">Bus11</option>
+        <option value="bus12">Bus12</option>
+    </select>
+    <div id="map-section" style="height:400px;">
+       <h3>📍 Live Bus Locations</h3>
+        <div id="map" style="width:100%; height: 100vh"></div>
+        <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
         <h3>🔍 See Bus Info</h3>
         <select id="bus-selector" onchange="showBusDetails()">
@@ -101,4 +131,4 @@
 <!-- Load main script -->
 <script src="script.js"></script>
 </body>
-</html>
+            </html>
