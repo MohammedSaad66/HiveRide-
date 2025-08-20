@@ -1,12 +1,12 @@
 // ✅ Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyC955U9CGs0-aAcS0hgSFQgvDlwOK1SRnA",
-  authDomain: "flutter-bus-hiveride.firebaseapp.com",
-  databaseURL: "https://flutter-bus-hiveride-default-rtdb.firebaseio.com",
-  projectId: "flutter-bus-hiveride",
-  storageBucket: "flutter-bus-hiveride.firebasestorage.app",
-  messagingSenderId: "185743407069",
-  appId: "1:185743407069:web:7b9c33f8e25b8966d62834"
+    apiKey: "AIzaSyC955U9CGs0-aAcS0hgSFQgvDlwOK1SRnA",
+    authDomain: "flutter-bus-hiveride.firebaseapp.com",
+    databaseURL: "https://flutter-bus-hiveride-default-rtdb.firebaseio.com",
+    projectId: "flutter-bus-hiveride",
+    storageBucket: "flutter-bus-hiveride.firebasestorage.app",
+    messagingSenderId: "185743407069",
+    appId: "1:185743407069:web:7b9c33f8e25b8966d62834"
 };
 
 // Initialize Firebase
@@ -14,327 +14,366 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// Toggle Register/Login view
-function toggleAuth() {
-  const reg = document.getElementById("register-section");
-  const log = document.getElementById("login-section");
-  reg.style.display = reg.style.display === "none" ? "block" : "none";
-  log.style.display = log.style.display === "none" ? "block" : "none";
-}
+// --- 🌐 MAP & TRACKING FUNCTIONS ---
+let map;
+let busMarkers = {}; // Object to store markers for each bus
 
-// Register
-function register() {
-  const email = document.getElementById("reg-email").value;
-  const password = document.getElementById("reg-password").value;
-  const role = document.getElementById("reg-role").value;
-  auth.createUserWithEmailAndPassword(email, password).then(cred => {
-    return db.ref("users/" + cred.user.uid).set({ email, role });
-  });
-}
-
-// Login
-function login() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
-  auth.signInWithEmailAndPassword(email, password);
-}
-
-// Logout
-function logout() {
-  auth.signOut();
-}
-  // Map initialization
-    var map = L.map('map').setView([12.9165, 79.1325], 12);
-
-    //osm layer
-    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+/**
+ * Initializes the Leaflet map.
+ * Avoids re-initializing if the map already exists.
+ */
+function initMap() {
+    if (map) return;
+    map = L.map('map').setView([12.9165, 79.1325], 12); // Centered on Vellore, India
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    });
-    osm.addTo(map);
-   let busMarkers = {}; // store markers for buses
-
-   // Function to update marker
-   function updateBusMarker(busId, lat, lng) {
-       if (busMarkers[busId]) {
-           busMarkers[busId].setLatLng([lat, lng]); // move marker
-       } else {
-           busMarkers[busId] = L.marker([lat, lng]).addTo(map)
-               .bindPopup(`<b>${busId}</b>`);
-       }
-   }
-
-   // Listen to Firebase
-   const busesRef = firebase.database().ref("buses");
-   busesRef.on("value", snapshot => {
-       let buses = snapshot.val();
-       if (!buses) return;
-
-       // Clear all markers if needed
-       // Object.values(busMarkers).forEach(marker => map.removeLayer(marker));
-       // busMarkers = {};
-
-       // Add/update markers
-       for (let busId in buses) {
-           let { latitude, longitude } = buses[busId];
-           updateBusMarker(busId, latitude, longitude);
-       }
-   });
-
-   // When student selects a bus
-   document.getElementById("busSelect").addEventListener("change", function () {
-       let selectedBus = this.value;
-
-       if (selectedBus && busMarkers[selectedBus]) {
-           map.setView(busMarkers[selectedBus].getLatLng(), 14); // zoom to bus
-           busMarkers[selectedBus].openPopup();
-       }
-   });
-
-
-// Load bus list into dropdown
-function loadBusList() {
-  db.ref("busDetails").once("value", snap => {
-    const selector = document.getElementById("bus-selector");
-    selector.innerHTML = '<option>Select a bus</option>';
-    snap.forEach(child => {
-      const option = document.createElement("option");
-      option.value = child.key;
-      option.text = child.key + " - " + child.val().route;
-      selector.appendChild(option);
-    });
-  });
+    }).addTo(map);
 }
 
-// Show selected bus details
+/**
+ * Listens for bus location updates from Firebase and updates the map.
+ */
+function trackAllBuses() {
+    const busesRef = db.ref("buses");
+    busesRef.on("value", snapshot => {
+        const buses = snapshot.val();
+        if (!buses) return;
+        for (let busId in buses) {
+            const {
+                latitude,
+                longitude
+            } = buses[busId];
+            updateBusMarker(busId, latitude, longitude);
+        }
+    });
+}
+
+/**
+ * Adds a new bus marker to the map or moves an existing one.
+ */
+function updateBusMarker(busId, lat, lng) {
+    if (busMarkers[busId]) {
+        busMarkers[busId].setLatLng([lat, lng]); // Move existing marker
+    } else {
+        busMarkers[busId] = L.marker([lat, lng]).addTo(map)
+            .bindPopup(`<b>Bus: ${busId}</b>`);
+    }
+}
+
+
+// --- 👤 AUTHENTICATION FUNCTIONS ---
+
+/**
+ * Toggles the view between the Register and Login forms.
+ */
+function toggleAuth() {
+    const reg = document.getElementById("register-section");
+    const log = document.getElementById("login-section");
+    reg.style.display = reg.style.display === "none" ? "block" : "none";
+    log.style.display = log.style.display === "none" ? "block" : "none";
+}
+
+/**
+ * Registers a new user with email, password, and role.
+ */
+function register() {
+    const email = document.getElementById("reg-email").value;
+    const password = document.getElementById("reg-password").value;
+    const role = document.getElementById("reg-role").value;
+    auth.createUserWithEmailAndPassword(email, password).then(cred => {
+        return db.ref("users/" + cred.user.uid).set({
+            email,
+            role
+        });
+    }).catch(error => alert(error.message));
+}
+
+/**
+ * Logs in an existing user with email and password.
+ */
+function login() {
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+    auth.signInWithEmailAndPassword(email, password).catch(error => alert(error.message));
+}
+
+/**
+ * Initiates Google Sign-In and sets the user's role to 'student' by default.
+ */
+function googleSignIn() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(result => {
+        const user = result.user;
+        db.ref("users/" + user.uid).set({
+            email: user.email,
+            role: "student"
+        });
+    }).catch(error => alert("Google Sign-in error: " + error.message));
+}
+
+/**
+ * Logs out the currently signed-in user.
+ */
+function logout() {
+    auth.signOut();
+}
+
+
+// --- 🚗 DRIVER FUNCTIONS ---
+
+/**
+ * Gets the driver's geolocation and sends it to Firebase continuously.
+ */
+function sendLocation() {
+    const busNo = document.getElementById("busNumber").value;
+    if (!busNo) {
+        return alert("Bus number not assigned. Please contact admin.");
+    }
+
+    if ("geolocation" in navigator) {
+        navigator.geolocation.watchPosition(
+            position => {
+                const {
+                    latitude,
+                    longitude
+                } = position.coords;
+                db.ref("buses/" + busNo).set({
+                    latitude,
+                    longitude
+                });
+                document.getElementById("location-status").innerText =
+                    `✅ Location sent for ${busNo} at ${new Date().toLocaleTimeString()}`;
+            },
+            error => {
+                document.getElementById("location-status").innerText =
+                    `Error: ${error.message}`;
+            }, {
+                enableHighAccuracy: true
+            }
+        );
+    } else {
+        alert("Geolocation is not available in your browser.");
+    }
+}
+
+
+// --- 👨‍🎓 STUDENT & GENERAL FUNCTIONS ---
+
+/**
+ * Loads the list of buses into the dropdown selector for students.
+ */
+function loadBusList() {
+    db.ref("busDetails").once("value", snap => {
+        const selector = document.getElementById("bus-selector");
+        selector.innerHTML = '<option value="">Select a bus to view</option>';
+        snap.forEach(child => {
+            const option = document.createElement("option");
+            option.value = child.key;
+            option.text = `${child.key} - ${child.val().route}`;
+            selector.appendChild(option);
+        });
+    });
+}
+
+/**
+ * Shows the details of the bus selected from the dropdown.
+ */
 function showBusDetails() {
-  const busNo = document.getElementById("bus-selector").value;
-  db.ref("busDetails/" + busNo).once("value", snap => {
-    const info = snap.val();
-    document.getElementById("bus-info").innerHTML = `
+    const busNo = document.getElementById("bus-selector").value;
+    if (!busNo) {
+        document.getElementById("bus-info").innerHTML = "";
+        return;
+    }
+    db.ref("busDetails/" + busNo).once("value", snap => {
+        const info = snap.val();
+        document.getElementById("bus-info").innerHTML = `
       <p><b>Bus:</b> ${busNo}</p>
       <p><b>Route:</b> ${info.route}</p>
       <p><b>Driver:</b> ${info.driverName}</p>
       <p><b>Phone:</b> ${info.driverPhone}</p>
     `;
-  });
+    });
 }
 
-// Edit bus details
+// Event listener for the bus selector dropdown.
+document.getElementById("bus-selector").addEventListener("change", function() {
+    let selectedBus = this.value;
+    showBusDetails();
+    if (selectedBus && busMarkers[selectedBus]) {
+        map.setView(busMarkers[selectedBus].getLatLng(), 15); // Zoom to bus
+        busMarkers[selectedBus].openPopup();
+    }
+});
+
+
+// --- ⚙️ ADMIN FUNCTIONS ---
+
+/**
+ * Edits the details for a specific bus in Firebase.
+ */
 function editBusDetails() {
-  const busNo = document.getElementById("bus-edit-number").value;
-  const route = document.getElementById("bus-edit-route").value;
-  const name = document.getElementById("bus-edit-driver").value;
-  const phone = document.getElementById("bus-edit-phone").value;
-  if (busNo && route && name && phone) {
-    db.ref("busDetails/" + busNo).set({ route, driverName: name, driverPhone: phone });
-    alert("Bus details updated.");
-  }
+    const busNo = document.getElementById("bus-edit-number").value;
+    const route = document.getElementById("bus-edit-route").value;
+    const name = document.getElementById("bus-edit-driver").value;
+    const phone = document.getElementById("bus-edit-phone").value;
+    if (busNo && route && name && phone) {
+        db.ref("busDetails/" + busNo).set({
+            route: route,
+            driverName: name,
+            driverPhone: phone
+        });
+        alert("Bus details updated successfully.");
+    } else {
+        alert("Please fill all bus detail fields.");
+    }
 }
-// 🚍 Add a new route
-function addRoute() {
-  const name = document.getElementById("route-name").value.trim();
-  const distance = parseFloat(document.getElementById("route-distance").value);
-  const fee = parseFloat(document.getElementById("route-fee").value);
-  if (!name || isNaN(distance) || isNaN(fee)) {
-    return alert("Enter valid route data.");
-  }
-  db.ref("routes/" + name).set({ distance, fee }).then(() => {
-    alert("Route added.");
-    loadRoutes(); // reload after add
-  });
+
+/**
+ * Adds a new, detailed schedule entry to Firebase.
+ */
+function addSchedule() {
+    const busNo = document.getElementById("bus-no").value;
+    const route = document.getElementById("bus-route").value;
+    const morning = document.getElementById("morning-time").value;
+    const evening = document.getElementById("evening-time").value;
+    const driver = document.getElementById("driver-name").value;
+    const mobile = document.getElementById("driver-mobile").value;
+
+    if (!busNo || !route || !morning || !evening || !driver || !mobile) {
+        alert("⚠️ Please fill all fields!");
+        return;
+    }
+
+    db.ref("schedule").push().set({
+        busNo,
+        route,
+        morning,
+        evening,
+        driver,
+        mobile
+    }).then(() => {
+        alert("Schedule added successfully!");
+        // Clear input fields after successful submission
+        document.getElementById("bus-no").value = "";
+        document.getElementById("bus-route").value = "";
+        document.getElementById("morning-time").value = "";
+        document.getElementById("evening-time").value = "";
+        document.getElementById("driver-name").value = "";
+        document.getElementById("driver-mobile").value = "";
+    });
 }
-// Example schedule load
+
+/**
+ * Loads schedule entries from Firebase into the admin table.
+ */
 function loadSchedule() {
-    const scheduleRef = firebase.database().ref("schedule");
+    const scheduleRef = db.ref("schedule");
     scheduleRef.on("value", (snapshot) => {
         const data = snapshot.val();
         const tbody = document.getElementById("schedule-body");
-        tbody.innerHTML = "";
+        tbody.innerHTML = ""; // Clear existing table data
+
+        if (!data) {
+            tbody.innerHTML = '<tr><td colspan="7">No schedule data available.</td></tr>';
+            return;
+        }
+
         for (let key in data) {
+            const item = data[key];
             const tr = document.createElement("tr");
-
-            const tdItem = document.createElement("td");
-            tdItem.innerText = data[key];
-            tr.appendChild(tdItem);
-
-            const tdActions = document.createElement("td");
-
-            // Edit button
-            const editBtn = document.createElement("button");
-            editBtn.innerText = "Edit";
-            editBtn.onclick = () => {
-                const newVal = prompt("Edit schedule:", data[key]);
-                if (newVal) {
-                    firebase.database().ref("schedule/" + key).set(newVal);
-                }
-            };
-            tdActions.appendChild(editBtn);
-
-            // Delete button
-            const deleteBtn = document.createElement("button");
-            deleteBtn.innerText = "Delete";
-            deleteBtn.onclick = () => {
-                firebase.database().ref("schedule/" + key).remove();
-            };
-            tdActions.appendChild(deleteBtn);
-
-            tr.appendChild(tdActions);
+            tr.innerHTML = `
+                <td>${item.busNo}</td>
+                <td>${item.route}</td>
+                <td>${item.morning}</td>
+                <td>${item.evening}</td>
+                <td>${item.driver}</td>
+                <td>${item.mobile}</td>
+                <td>
+                    <button onclick="deleteSchedule('${key}')">❌ Delete</button>
+                </td>
+            `;
             tbody.appendChild(tr);
         }
     });
 }
 
-// Add new schedule item
-function addSchedule() {
-    const val = document.getElementById("new-schedule").value;
-    if (val) {
-        firebase.database().ref("schedule").push(val);
-        document.getElementById("new-schedule").value = "";
+/**
+ * Deletes a specific schedule entry from Firebase.
+ */
+function deleteSchedule(key) {
+    if (confirm("Are you sure you want to delete this schedule entry?")) {
+        db.ref("schedule/" + key).remove();
     }
 }
-// 📋 Load routes into dropdown and list
-function loadRoutes() {
-  const routeSelect = document.getElementById("student-route-edit");
-  const routeList = document.getElementById("route-list");
 
-  if (routeSelect) routeSelect.innerHTML = '<option value="">Select Route</option>';
-  if (routeList) routeList.innerHTML = "";
 
-  db.ref("routes").once("value", snap => {
-    snap.forEach(child => {
-      const name = child.key;
-      const { distance, fee } = child.val();
+// --- 🔥 MAIN APP LOGIC (AUTH STATE CHANGE) ---
 
-      if (routeSelect) {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = `${name} (₹${fee}, ${distance}km)`;
-        routeSelect.appendChild(option);
-      }
-
-      if (routeList) {
-        const li = document.createElement("li");
-        li.textContent = `${name}: ₹${fee}, ${distance}km`;
-        routeList.appendChild(li);
-      }
-    });
-  });
-}
-
-// ✏️ Admin sets student name, fee, and route
-function editStudentDetails() {
-  const email = document.getElementById("student-email-edit").value.trim();
-  const name = document.getElementById("student-name-edit").value.trim();
-  const route = document.getElementById("student-route-edit").value;
-  const fee = parseFloat(document.getElementById("student-fee-edit").value);
-
-  if (!email || !name || !route || isNaN(fee)) {
-    return alert("Please fill all student details.");
-  }
-
-  db.ref("studentInfo/" + email.replace(/\./g, "_")).set({
-    name, route, fee
-  }).then(() => {
-    alert("Student details updated.");
-  });
-}
-// Auth state check
+/**
+ * This is the core function that runs when a user logs in or out.
+ * It controls what is visible on the page based on the user's role.
+ */
 auth.onAuthStateChanged(user => {
-  if (user) {
-    document.getElementById("auth-section").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
+    const authSection = document.getElementById("auth-section");
+    const dashboard = document.getElementById("dashboard");
+    const adminControls = document.getElementById("admin-controls");
+    const driverLocation = document.getElementById("driver-location");
+    const mapSection = document.getElementById("map-section");
+    const studentInfo = document.getElementById("student-info-section");
 
-    db.ref("users/" + user.uid).once("value").then(snapshot => {
-      const { role, email } = snapshot.val();
-      document.getElementById("user-role").innerText = role;
+    if (user) {
+        // User is signed in.
+        authSection.style.display = "none";
+        dashboard.style.display = "block";
 
-      if (role === "admin") {
-        document.getElementById("admin-controls").style.display = "block";
-        document.getElementById("map-section").style.display = "block";
-        initMap(); trackAllBuses(); loadBusList();
-      }
-      if (role === "student") {
-        document.getElementById("map-section").style.display = "block";
-        initMap(); trackAllBuses(); loadBusList();
-      }
-      if (role === "driver") {
-        document.getElementById("driver-location").style.display = "block";
-        db.ref("driverAssignments").orderByValue().equalTo(email).once("value", snap => {
-          snap.forEach(child => {
-            document.getElementById("driver-bus-no").innerText = child.key;
-            document.getElementById("busNumber").value = child.key;
-          });
+        db.ref("users/" + user.uid).once("value").then(snapshot => {
+            if (!snapshot.exists()) return;
+
+            const {
+                role,
+                email
+            } = snapshot.val();
+            document.getElementById("user-role").innerText = `Role: ${role}`;
+
+            // Hide all role-specific sections initially to prevent flashing content
+            adminControls.style.display = "none";
+            driverLocation.style.display = "none";
+            studentInfo.style.display = "none";
+            mapSection.style.display = "none";
+
+            // Show sections based on the user's role
+            if (role === "admin") {
+                adminControls.style.display = "block";
+                mapSection.style.display = "block";
+                initMap();
+                trackAllBuses();
+                loadBusList();
+                loadSchedule(); // Loads the detailed schedule table
+            } else if (role === "student") {
+                studentInfo.style.display = "block";
+                mapSection.style.display = "block";
+                initMap();
+                trackAllBuses();
+                loadBusList();
+            } else if (role === "driver") {
+                driverLocation.style.display = "block";
+                // Find the bus assigned to this driver
+                db.ref("driverAssignments").orderByValue().equalTo(email).once("value", snap => {
+                    if (snap.exists()) {
+                        snap.forEach(child => {
+                            document.getElementById("driver-bus-no").innerText = `Your Bus: ${child.key}`;
+                            document.getElementById("busNumber").value = child.key;
+                        });
+                    } else {
+                        document.getElementById("driver-bus-no").innerText = "No bus assigned.";
+                    }
+                });
+            }
         });
-      }
-    });
-
-    // Schedule listener
-    db.ref("schedule").on("value", snap => {
-      const list = document.getElementById("schedule-list");
-      list.innerHTML = "";
-      snap.forEach(child => {
-        const li = document.createElement("li");
-        li.innerText = child.val();
-        list.appendChild(li);
-      });
-    });
-
-
-
-    // Student fees listener
-    db.ref("studentFees").on("value", snap => {
-      const list = document.getElementById("fees-list");
-      list.innerHTML = "";
-      snap.forEach(child => {
-        const li = document.createElement("li");
-        li.innerText = `${child.key}: ₹${child.val()}`;
-        list.appendChild(li);
-      });
-    });
-  } else {
-    document.getElementById("auth-section").style.display = "block";
-    document.getElementById("dashboard").style.display = "none";
-  }
+    } else {
+        // No user is signed in.
+        authSection.style.display = "block";
+        dashboard.style.display = "none";
+    }
 });
-
-// Admin schedule + fee handlers
-function addSchedule() {
-  const item = document.getElementById("new-schedule").value;
-  if (!item) return;
-  db.ref("schedule").push(item);
-}
-
-function setCommonFee() {
-  const fee = document.getElementById("common-fee-input").value;
-  db.ref("commonFee").set(Number(fee));
-}
-
-function setStudentFee() {
-  const input = document.getElementById("student-fee").value;
-  const [email, fee] = input.split(":");
-  db.ref("studentFees/" + email.trim()).set(Number(fee.trim()));
-}
-
-function assignDriverBus() {
-  const input = document.getElementById("driver-assign").value;
-  const [driverEmail, busNo] = input.split(":");
-  db.ref("driverAssignments/" + busNo.trim()).set(driverEmail.trim());
-}
-
-// OTP login
-window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-  size: 'invisible',
-  callback: response => sendOTP()
-});
-
-let confirmationResult;
-
-
-// Google Sign-In
-function googleSignIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).then(result => {
-    const user = result.user;
-    db.ref("users/" + user.uid).set({ email: user.email, role: "student" });
-  }).catch(error => alert("Google Sign-in error: " + error.message));
-   }
+      
