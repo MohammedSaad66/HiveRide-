@@ -1,27 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Bus Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 
-    <!-- Firebase & Google Maps -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDlBLfYKNqJyvYWcG8Cb-Azl_9ZxIJIlC0&callback=initMap"></script>
-
 </head>
 <body>
+
 <h1>🚌 Bus Tracker Web App</h1>
 
-<!-- 🔐 Auth Section -->
-<div id="auth-section">
-    <div id="register-section" class="section">
+<div id="auth-section" class="section">
+    <div id="register-section">
         <h2>Register</h2>
-        <input id="reg-email" placeholder="Email" />
+        <input id="reg-email" type="email" placeholder="Email" />
         <input id="reg-password" type="password" placeholder="Password" />
         <select id="reg-role">
             <option value="student">Student</option>
@@ -31,104 +29,108 @@
         <button onclick="register()">Register</button>
     </div>
 
-    <div id="login-section" class="section">
+    <div id="login-section" style="display: none;">
         <h2>Login</h2>
-        <input id="login-email" placeholder="Email" />
+        <input id="login-email" type="email" placeholder="Email" />
         <input id="login-password" type="password" placeholder="Password" />
         <button onclick="login()">Login</button>
     </div>
 
     <button onclick="googleSignIn()">Sign in with Google</button>
-    <button onclick="toggleAuth()">Switch Register/Login</button>
+    <button onclick="toggleAuth()">Switch to Login/Register</button>
 </div>
 
-<!-- 📊 Dashboard -->
 <div id="dashboard" style="display: none;">
-    <h2>Welcome, <span id="user-role"></span>!</h2>
+    <h2>Welcome! <span id="user-role"></span></h2>
     <button onclick="logout()">Logout</button>
+    <hr>
 
-    <h3>📅 Schedule</h3>
-    <ul id="schedule-list"></ul>
-    <table id="schedule-table" border="1">
-        <thead>
-        <tr>
-            <th>Schedule Item</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="schedule-body"></tbody>
-    </table>
-    <!-- 🛣️ Route Fees -->
-    <div id="fees-section">
-        <h3>💰 Route Fees</h3>
-        <ul id="fees-list"></ul>
-    </div>
-
-    <div id="driver-info">
-        <h3>🚌 Your Bus No</h3>
-        <p id="driver-bus-no"></p>
-    </div>
-    <label for="bus-select">Select Bus:</label>
-    <select id="bus-select">
-        <option value="">-- Choose Bus --</option>
-    </select>
-    <!-- Admin Controls -->
-    <div id="admin-controls" style="display: none;">
-        <h3>➕ Fix Bus Schedule</h3>
-        <input id="new-schedule" placeholder="New schedule item" />
-        <button onclick="addSchedule()">Add</button>
-
-        <!-- 🚍 Assign / Change Bus & Driver -->
-        <h3>🚍 Change Bus No & Route</h3>
-        <input id="bus-edit-number" placeholder="Bus No (e.g., BUS101)" />
-        <input id="bus-edit-route" placeholder="Route Name" />
-        <input id="bus-edit-driver" placeholder="Driver Name" />
-        <input id="bus-edit-phone" placeholder="Driver Phone" />
-        <button onclick="editBusDetails()">Save</button>
-
-        <!-- 🛣️ Manage Route Fees -->
-        <h3>🛣️ Add Route & Fee</h3>
-        <input id="route-name" placeholder="Route Name" />
-        <input id="route-distance" type="number" placeholder="Distance (km)" />
-        <input id="route-fee" type="number" placeholder="Fee (₹)" />
-        <button onclick="addRoute()">Add Route</button>
-    </div>
-    <select id="busSelect">
-        <option value="">Choose Bus</option>
-        <option value="bus1">Bus1</option>
-        <option value="bus2">Bus2</option>
-        <option value="bus3">Bus3</option>
-        <option value="bus4">Bus4</option>
-        <option value="bus5">Bus5</option>
-        <option value="bus6">Bus6</option>
-        <option value="bus7">Bus7</option>
-        <option value="bus8">Bus8</option>
-        <option value="bus9">Bus9</option>
-        <option value="bus10">Bus10</option>
-        <option value="bus11">Bus11</option>
-        <option value="bus12">Bus12</option>
-    </select>
-    <div id="map-section" style="height:400px;">
-       <h3>📍 Live Bus Locations</h3>
-        <div id="map" style="width:100%; height: 100vh"></div>
-        <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
-        <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-
-        <h3>🔍 See Bus Info</h3>
-        <select id="bus-selector" onchange="showBusDetails()">
-            <option>Select a bus</option>
+    <div id="student-info-section" class="section" style="display: none;">
+        <h3>🔍 Find Your Bus</h3>
+        <select id="bus-selector">
+            <option value="">-- Select a Bus --</option>
         </select>
         <div id="bus-info"></div>
+        <hr>
+
+        <h3>📅 Full Bus Schedule</h3>
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Bus No</th>
+              <th>Route</th>
+              <th>Morning Time</th>
+              <th>Evening Time</th>
+              <th>Driver Name</th>
+              <th>Driver Mobile</th>
+            </tr>
+          </thead>
+          <tbody id="schedule-body-student"></tbody>
+        </table>
     </div>
 
-    <div id="driver-location" style="display: none;">
+    <div id="driver-location" class="section" style="display: none;">
         <h3>📡 Send Live Location</h3>
-        <input id="busNumber" placeholder="Enter Bus Number (e.g., BUS101)" />
-        <button onclick="startSending()">Start Sending Location</button>
+        <p id="driver-bus-no">Loading your assigned bus...</p>
+        <button onclick="sendLocation()">Start Sending Location</button>
+        <p id="location-status"></p>
+        <input type="hidden" id="busNumber">
+    </div>
+
+    <div id="admin-controls" class="section" style="display: none;">
+        <h3>Admin Dashboard</h3>
+
+        <div class="admin-subsection">
+            <h4>➕ Add / Edit Bus Schedule</h4>
+            <div class="form-container">
+                <input type="text" id="bus-no" placeholder="Bus Number (e.g., Bus-01)">
+                <input type="text" id="bus-route" placeholder="Route Name">
+                <input type="text" id="morning-time" placeholder="Morning Time (e.g., 8:00 AM)">
+                <input type="text" id="evening-time" placeholder="Evening Time (e.g., 5:00 PM)">
+                <input type="text" id="driver-name" placeholder="Driver Name">
+                <input type="text" id="driver-mobile" placeholder="Driver Mobile">
+                <button onclick="addSchedule()">Save Schedule</button>
+            </div>
+        </div>
+        
+        <div class="admin-subsection">
+            <h4>📋 Current Schedule</h4>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Bus No</th>
+                        <th>Route</th>
+                        <th>Morning</th>
+                        <th>Evening</th>
+                        <th>Driver</th>
+                        <th>Mobile</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-body"></tbody>
+            </table>
+        </div>
+
+        <div class="admin-subsection">
+            <h4>🚍 Edit Bus Details</h4>
+            <input id="bus-edit-number" placeholder="Bus No (e.g., BUS101)" />
+            <input id="bus-edit-route" placeholder="Route Name" />
+            <input id="bus-edit-driver" placeholder="Driver Name" />
+            <input id="bus-edit-phone" placeholder="Driver Phone" />
+            <button onclick="editBusDetails()">Save Bus Details</button>
+        </div>
+    </div>
+
+    <div id="map-section" class="section" style="display: none;">
+       <h3>📍 Live Bus Locations</h3>
+        <div id="map"></div>
     </div>
 </div>
 
-<!-- Load main script -->
+<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+
 <script src="script.js"></script>
+
 </body>
-            </html>
+    </html>
+    
