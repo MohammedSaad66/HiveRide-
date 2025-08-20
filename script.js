@@ -196,7 +196,6 @@ function addSchedule() {
     });
 }
 
-// ✅ FIX: This function is updated to work for both students and admins.
 function loadSchedule() {
     const scheduleRef = db.ref("schedule");
     scheduleRef.on("value", (snapshot) => {
@@ -251,6 +250,59 @@ function deleteSchedule(key) {
     }
 }
 
+// ✅ NEW: Functions for Managing Routes
+function addRoute() {
+    const route = document.getElementById("route-name").value;
+    const distance = document.getElementById("route-distance").value;
+    const fee = document.getElementById("route-fee").value;
+
+    if (!route || !distance || !fee) {
+        alert("⚠️ Please fill all fields!");
+        return;
+    }
+
+    const routeRef = db.ref("routes").push();
+    routeRef.set({
+        route,
+        distance,
+        fee
+    });
+
+    document.getElementById("route-name").value = "";
+    document.getElementById("route-distance").value = "";
+    document.getElementById("route-fee").value = "";
+}
+
+function loadRoutes() {
+    const routeRef = db.ref("routes");
+    routeRef.on("value", (snapshot) => {
+        const data = snapshot.val();
+        const tbody = document.getElementById("fees-body");
+        tbody.innerHTML = "";
+
+        for (let key in data) {
+            const item = data[key];
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${item.route}</td>
+                <td>${item.distance} km</td>
+                <td>₹${item.fee}</td>
+                <td>
+                    <button onclick="deleteRoute('${key}')">❌ Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+    });
+}
+
+function deleteRoute(key) {
+    if (confirm("Are you sure you want to delete this route?")) {
+        db.ref("routes/" + key).remove();
+    }
+}
+
 
 // --- 🔥 MAIN APP LOGIC (AUTH STATE CHANGE) ---
 auth.onAuthStateChanged(user => {
@@ -283,13 +335,14 @@ auth.onAuthStateChanged(user => {
                 trackAllBuses();
                 loadBusList();
                 loadSchedule();
+                loadRoutes(); // ✅ NEW: Load routes for admin
             } else if (role === "student") {
                 studentInfo.style.display = "block";
                 mapSection.style.display = "block";
                 initMap();
                 trackAllBuses();
                 loadBusList();
-                loadSchedule(); // ✅ FIX: Added this line to load the schedule for students.
+                loadSchedule(); 
             } else if (role === "driver") {
                 driverLocation.style.display = "block";
                 db.ref("driverAssignments").orderByValue().equalTo(email).once("value", snap => {
@@ -310,4 +363,4 @@ auth.onAuthStateChanged(user => {
         currentUserRole = null;
     }
 });
-        
+    
