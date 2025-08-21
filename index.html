@@ -23,7 +23,7 @@
         <input id="reg-password" type="password" placeholder="Password" />
         <select id="reg-role">
             <option value="student">Student</option>
-            
+            <option value="admin-user">AdminUser</option>
             <option value="driver">Driver</option>
         </select>
         <button onclick="register()">Register</button>
@@ -35,7 +35,6 @@
         <input id="login-password" type="password" placeholder="Password" />
         <button onclick="login()">Login</button>
     </div>
-
     <button onclick="googleSignIn()">Sign in with Google</button>
     <button onclick="toggleAuth()">Switch to Login/Register</button>
 </div>
@@ -69,6 +68,19 @@
         </table>
     </div>
 
+<hr>
+<h3>💰 Route Fees (View Only)</h3>
+<table id="fees-table-student" border="1">
+    <thead>
+        <tr>
+            <th>Route</th>
+            <th>Distance (km)</th>
+            <th>Fee (₹)</th>
+        </tr>
+    </thead>
+    <tbody id="fees-body-student"></tbody>
+</table>
+    
     <div id="driver-location" class="section" style="display: none;">
         <h3>📡 Send Live Location</h3>
         <p id="driver-bus-no">Loading your assigned bus...</p>
@@ -135,7 +147,28 @@
         <tbody id="fees-body"></tbody>
     </table>
 </div>
+<h2>Add New Driver</h2>
+<form id="driverForm">
+  <input type="text" id="driverName" placeholder="Driver Name" required>
+  <input type="text" id="busNo" placeholder="Bus No" required>
+  <input type="text" id="route" placeholder="Route" required>
+  <button type="submit">Add Driver</button>
+</form>
 
+<hr>
+
+<h2>Driver Details</h2>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Driver Name</th>
+      <th>Bus No</th>
+      <th>Route</th>
+      <th id="actionHeader" style="display:none;">Action</th>
+    </tr>
+  </thead>
+  <tbody id="driverTableBody"></tbody>
+</table>
         <div class="admin-subsection">
             <h4>🚍 Edit Bus Details</h4>
             <input id="bus-edit-number" placeholder="Bus No (e.g., BUS101)" />
@@ -171,4 +204,4 @@
 <script src="script.js"></script>
 
 </body>
-</html>
+                </html>
