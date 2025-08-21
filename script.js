@@ -47,7 +47,87 @@ function updateBusMarker(busId, lat, lng) {
             .bindPopup(`<b>Bus: ${busId}</b>`);
     }
 }
+const driverTableBody = document.getElementById("driverTableBody");
 
+// Listen for drivers in Firebase
+db.ref("drivers").on("value", (snapshot) => {
+  driverTableBody.innerHTML = "";
+  snapshot.forEach((child) => {
+    let driver = child.val();
+    let key = child.key;
+
+    let row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td contenteditable="false">${driver.name}</td>
+      <td contenteditable="false">${driver.busNo}</td>
+      <td contenteditable="false">${driver.route}</td>
+      <td class="actionCell" style="display:none;">
+        <button onclick="editDriver('${key}', this)">Edit</button>
+        <button onclick="deleteDriver('${key}')">Delete</button>
+      </td>
+    `;
+
+    driverTableBody.appendChild(row);
+  });
+
+  // If admin is logged in → show action column
+  if (userRole === "admin") {
+    document.getElementById("actionHeader").style.display = "block";
+    document.querySelectorAll(".actionCell").forEach(cell => {
+      cell.style.display = "block";
+    });
+  }
+});
+
+// Add Driver (same as before)
+const driverForm = document.getElementById("driverForm");
+if (driverForm) {
+  driverForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    let name = document.getElementById("driverName").value;
+    let busNo = document.getElementById("busNo").value;
+    let route = document.getElementById("route").value;
+
+    db.ref("drivers").push({ name, busNo, route });
+
+    driverForm.reset();
+  });
+}
+
+// Edit Driver
+function editDriver(key, btn) {
+  let row = btn.parentElement.parentElement;
+  let tds = row.querySelectorAll("td");
+
+  if (btn.innerText === "Edit") {
+    // Enable editing
+    tds[0].contentEditable = "true";
+    tds[1].contentEditable = "true";
+    tds[2].contentEditable = "true";
+    btn.innerText = "Save";
+  } else {
+    // Save to Firebase
+    let updated = {
+      name: tds[0].innerText,
+      busNo: tds[1].innerText,
+      route: tds[2].innerText
+    };
+
+    db.ref("drivers/" + key).set(updated);
+    tds[0].contentEditable = "false";
+    tds[1].contentEditable = "false";
+    tds[2].contentEditable = "false";
+    btn.innerText = "Edit";
+  }
+}
+
+// Delete Driver
+function deleteDriver(key) {
+  if (confirm("Are you sure you want to delete this driver?")) {
+    db.ref("drivers/" + key).remove();
+  }
+}
 
 // --- 👤 AUTHENTICATION FUNCTIONS ---
 function toggleAuth() {
@@ -407,6 +487,49 @@ function deleteRoute(key) {
     }
 }
 
+function loadRoutes() {
+    db.ref("routes").on("value", snapshot => {
+        const data = snapshot.val();
+        const adminTbody = document.getElementById("fees-body");
+        const studentTbody = document.getElementById("fees-body-student");
+
+        if (adminTbody) adminTbody.innerHTML = "";
+        if (studentTbody) studentTbody.innerHTML = "";
+
+        if (!data) return;
+
+        for (let key in data) {
+            const item = data[key];
+
+            // Admin (editable)
+            if (adminTbody && currentUserRole === "admin") {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${item.route}</td>
+                    <td>${item.distance}</td>
+                    <td>${item.fee}</td>
+                    <td>
+                        <button onclick="editRoute('${key}')">Edit</button>
+                        <button onclick="deleteRoute('${key}')">❌ Delete</button>
+                    </td>
+                `;
+                adminTbody.appendChild(tr);
+            }
+
+            // Student (view-only)
+            if (studentTbody && currentUserRole === "student") {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${item.route}</td>
+                    <td>${item.distance}</td>
+                    <td>${item.fee}</td>
+                `;
+                studentTbody.appendChild(tr);
+            }
+        }
+    });
+}
+
 
 // --- 🔥 MAIN APP LOGIC (AUTH STATE CHANGE) ---
 auth.onAuthStateChanged(user => {
@@ -448,22 +571,3 @@ auth.onAuthStateChanged(user => {
                 loadBusList();
                 loadSchedule(); 
             } else if (role === "driver") {
-                driverLocation.style.display = "block";
-                db.ref("driverAssignments").orderByValue().equalTo(email).once("value", snap => {
-                    if (snap.exists()) {
-                        snap.forEach(child => {
-                            document.getElementById("driver-bus-no").innerText = `Your Bus: ${child.key}`;
-                            document.getElementById("busNumber").value = child.key;
-                        });
-                    } else {
-                        document.getElementById("driver-bus-no").innerText = "No bus assigned.";
-                    }
-                });
-            }
-        });
-    } else {
-        authSection.style.display = "block";
-        dashboard.style.display = "none";
-        currentUserRole = null;
-    }
-});
