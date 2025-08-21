@@ -65,12 +65,67 @@ function register() {
         return db.ref("users/" + cred.user.uid).set({ email, role });
     }).catch(error => alert(error.message));
 }
+const allowedAdmins = [
+    { email: "admin1@example.com", password: "admin123" },
+    { email: "admin2@example.com", password: "admin123" },
+    { email: "admin3@example.com", password: "admin123" }
+];
 
-function login() {
+
+   
+     // Check if admin
+    function login() {
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-password").value;
-    auth.signInWithEmailAndPassword(email, password).catch(error => alert(error.message));
+
+    // ✅ Only these Admins are allowed
+    const allowedAdmins = [
+        "admin1@gmail.com",
+        "admin2@gmail.com",
+        "admin3@gmail.com",
+        "admin4@gmail.com"
+    ];
+
+    firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const uid = userCredential.user.uid;
+
+            // ✅ Check if this email is in allowed Admins
+            if (allowedAdmins.includes(email)) {
+                document.getElementById("user-role").innerText = "Admin";
+                document.getElementById("admin-controls").style.display = "block";
+                document.getElementById("dashboard").style.display = "block";
+                document.getElementById("auth-section").style.display = "none";
+                return;
+            }
+
+            // ❌ If not in allowed list → normal user/student
+            firebase.database().ref("users/" + uid).once("value")
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const role = snapshot.val().role || "User";
+                        document.getElementById("user-role").innerText = role;
+
+                        if (role === "Admin") {
+                            alert("❌ You are not in the official Admin list!");
+                            firebase.auth().signOut();
+                            return;
+                        }
+
+                        document.getElementById("admin-controls").style.display = "none";
+                        document.getElementById("dashboard").style.display = "block";
+                        document.getElementById("auth-section").style.display = "none";
+                    } else {
+                        alert("User role not found in database.");
+                        firebase.auth().signOut();
+                    }
+                });
+        })
+        .catch((error) => {
+            alert(error.message);
+        });
 }
+
 
 function googleSignIn() {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -224,6 +279,7 @@ function loadSchedule() {
             const rowHtmlForAdmin = `
                 <td>${item.busNo}</td> <td>${item.route}</td> <td>${item.morning}</td>
                 <td>${item.evening}</td> <td>${item.driver}</td> <td>${item.mobile}</td>
+                <button onclick="editRow('${key}')">Edit</button>
                 ${actionsCell}`;
             
             const rowHtmlForStudent = `
@@ -242,6 +298,53 @@ function loadSchedule() {
             }
         }
     });
+}
+
+function editRow(key) {
+    const scheduleRef = firebase.database().ref("schedules/" + key);
+    scheduleRef.once("value").then((snapshot) => {
+        const data = snapshot.val();
+
+        if (data) {
+            // Example: fill into input fields for editing
+            document.getElementById("busNo").value = data.busNo;
+            document.getElementById("route").value = data.route;
+            document.getElementById("morning").value = data.morning;
+            document.getElementById("evening").value = data.evening;
+            document.getElementById("driver").value = data.driver;
+            document.getElementById("mobile").value = data.mobile;
+
+            // Save which row is being edited
+            document.getElementById("scheduleForm").setAttribute("data-edit-id", key);
+        }
+    });
+}
+
+function saveSchedule() {
+  const busNo = document.getElementById("busNo").value;
+  const route = document.getElementById("route").value;
+  const morning = document.getElementById("morning").value;
+  const evening = document.getElementById("evening").value;
+  const driver = document.getElementById("driver").value;
+  const mobile = document.getElementById("mobile").value;
+
+  const scheduleForm = document.getElementById("scheduleForm");
+  const editKey = scheduleForm.getAttribute("data-edit-id");
+
+  if (editKey) {
+    // Update existing schedule
+    firebase.database().ref("schedules/" + editKey).update({
+      busNo, route, morning, evening, driver, mobile
+    });
+    scheduleForm.removeAttribute("data-edit-id"); // clear after saving
+  } else {
+    // Add new schedule
+    firebase.database().ref("schedules").push({
+      busNo, route, morning, evening, driver, mobile
+    });
+  }
+
+  scheduleForm.reset(); // clear form after save
 }
 
 function deleteSchedule(key) {
@@ -289,6 +392,7 @@ function loadRoutes() {
                 <td>${item.distance} km</td>
                 <td>₹${item.fee}</td>
                 <td>
+                    <button onclick="editRow('${key}')">Edit</button>
                     <button onclick="deleteRoute('${key}')">❌ Delete</button>
                 </td>
             `;
@@ -363,4 +467,3 @@ auth.onAuthStateChanged(user => {
         currentUserRole = null;
     }
 });
-    
