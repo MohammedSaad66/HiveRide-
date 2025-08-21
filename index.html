@@ -23,7 +23,7 @@
         <input id="reg-password" type="password" placeholder="Password" />
         <select id="reg-role">
             <option value="student">Student</option>
-            <option value="admin">Admin</option>
+            
             <option value="driver">Driver</option>
         </select>
         <button onclick="register()">Register</button>
@@ -110,6 +110,31 @@
                 <tbody id="schedule-body"></tbody>
             </table>
         </div>
+        <div id="fees-section">
+             <h3>💰 Route Fees</h3>
+            <ul id="fees-list"></ul>
+        </div>
+        <h3>🛣️ Add Route & Fee</h3>
+        <div class="form-container">
+            <input id="route-name" placeholder="Route Name" />
+            <input id="route-distance" type="number" placeholder="Distance (km)" />
+            <input id="route-fee" type="number" placeholder="Fee (₹)" />
+            <button onclick="addRoute()">Add Route</button>
+        </div>
+        <div id="fees-section">
+    <h3>💰 Route Fees</h3>
+    <table id="fees-table" border="1">
+        <thead>
+            <tr>
+                <th>Route</th>
+                <th>Distance (km)</th>
+                <th>Fee (₹)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="fees-body"></tbody>
+    </table>
+</div>
 
         <div class="admin-subsection">
             <h4>🚍 Edit Bus Details</h4>
@@ -120,7 +145,21 @@
             <button onclick="editBusDetails()">Save Bus Details</button>
         </div>
     </div>
-
+    <select id="bus-selector">
+            <option value="">-- Select a Bus --</option>
+            <option value="Bus1">Bus 1</option>
+            <option value="Bus2">Bus 2</option>
+            <option value="Bus3">Bus 3</option>
+            <option value="Bus4">Bus 4</option>
+            <option value="Bus5">Bus 5</option>
+            <option value="Bus6">Bus 6</option>
+            <option value="Bus7">Bus 7</option>
+            <option value="Bus8">Bus 8</option>
+            <option value="Bus9">Bus 9</option>
+            <option value="Bus10">Bus 10</option>
+            <option value="Bus11">Bus 11</option>
+            <option value="Bus12">Bus 12</option>
+        </select>
     <div id="map-section" class="section" style="display: none;">
        <h3>📍 Live Bus Locations</h3>
         <div id="map"></div>
@@ -132,4 +171,4 @@
 <script src="script.js"></script>
 
 </body>
-                    </html>
+</html>
